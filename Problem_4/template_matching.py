@@ -17,8 +17,16 @@ def template_match(template, image, threshold=0.999):
         matches: A list of (top-left y, top-left x, bounding box height, bounding box width) tuples for each match's bounding box.
     """
     ########## Code starts here ##########
-    raise NotImplementedError("Implement me!")
+    result = cv2.matchTemplate(image, template, method = cv2.TM_CCORR_NORMED)
+    h, w, _ = np.shape(template)
+    loc  = np.array(np.where(result > threshold)).transpose()
+    matchList = []
+    for [y, x] in loc:
+        matchList.append( (y, x, h, w))
+    return matchList
+    # raise NotImplementedError("Implement me!")
     ########## Code ends here ##########
+
 
 
 def create_and_save_detection_image(image, matches, filename="image_detections.png"):

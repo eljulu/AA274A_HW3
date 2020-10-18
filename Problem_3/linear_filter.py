@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 import numpy as np
 import time
 import cv2
 import matplotlib.pyplot as plt
-
 
 def corr(F, I):
     """
@@ -16,7 +15,26 @@ def corr(F, I):
         G: An (m, n)-shaped ndarray containing the correlation of the filter with the image.
     """
     ########## Code starts here ##########
-    raise NotImplementedError("Implement me!")
+    # raise NotImplementedError("Implement me!")
+    # record dim
+    k, ell, c = np.shape(F)
+    m, n, c = np.shape(I)
+    # padding
+    leftright = np.zeros((m, ell//2, c))
+    updown = np.zeros((k // 2, n + 2 * (ell//2), c))
+    I = np.hstack((leftright, I, leftright))
+    I = np.vstack((updown, I, updown))
+    I = np.hstack((I, np.zeros((m + 2 * (k//2),1,c))))
+    I = np.vstack((I, np.zeros((1, n + 2 * (ell//2) + 1,c))))
+    # correlation
+    G = np.zeros((m,n))
+    f = F.flatten()
+    # print(f)
+    for i in range(m):
+        for j in range(n):
+            t_ij = I[i:i+k, j:j+ell, :].flatten()
+            G[i][j] = np.dot(f, t_ij)
+    return G
     ########## Code ends here ##########
 
 
@@ -30,7 +48,27 @@ def norm_cross_corr(F, I):
         G: An (m, n)-shaped ndarray containing the normalized cross-correlation of the filter with the image.
     """
     ########## Code starts here ##########
-    raise NotImplementedError("Implement me!")
+    # raise NotImplementedError("Implement me!")
+    # record dim
+    k, ell, c = np.shape(F)
+    m, n, c = np.shape(I)
+    # padding
+    leftright = np.zeros((m, ell//2, c))
+    updown = np.zeros((k // 2, n + 2 * (ell//2), c))
+    I = np.hstack((leftright, I, leftright))
+    I = np.vstack((updown, I, updown))
+    I = np.hstack((I, np.zeros((m + 2 * (k//2),1,c))))
+    I = np.vstack((I, np.zeros((1, n + 2 * (ell//2) + 1,c))))
+    # correlation
+    G = np.zeros((m,n))
+    f = F.flatten()
+    fnorm = np.linalg.norm(f)
+    # print(f)
+    for i in range(m):
+        for j in range(n):
+            t_ij = I[i:i+k, j:j+ell, :].flatten()
+            G[i][j] = np.dot(f, t_ij)/fnorm/np.linalg.norm(t_ij)
+    return G
     ########## Code ends here ##########
 
 
@@ -41,7 +79,7 @@ def show_save_corr_img(filename, image, template):
     im = ax.imshow(image, interpolation='none', vmin=cropped_img.min())
     fig.colorbar(im)
     fig.savefig(filename, bbox_inches='tight')
-    plt.show()
+    # plt.show()
     plt.close(fig)
 
 
@@ -83,3 +121,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # a = np.array([[1, 2, 3],
+    #        [2, 4, 5],
+    #        [3, 5, 6]])
+    # a = np.dstack((a,a,a))
+    # print(populatevector(a))

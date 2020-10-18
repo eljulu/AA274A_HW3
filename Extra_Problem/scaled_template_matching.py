@@ -20,7 +20,27 @@ def template_match(template, image,
         matches: A list of (top-left y, top-left x, bounding box height, bounding box width) tuples for each match's bounding box.
     """
     ########## Code starts here ##########
-    raise NotImplementedError("Implement me!")
+    scaled_up = []
+    scaled_down = []
+    temp = image
+    h, w, _ = np.shape(template)
+    for i in range(num_downscales):
+        temp = cv2.pyrDown(temp)
+        scaled_down.append((0.5**(i+1), temp))
+    temp = image
+    for i in range(num_upscales):
+        temp = cv2.pyrUp(temp)
+        scaled_up.append((2**(i+1), temp))
+    scaled = scaled_up + scaled_down
+    scaled.append((1, image))
+    matches = []
+    for (scale, image) in scaled:
+        result = cv2.matchTemplate(image, template, method=cv2.TM_CCORR_NORMED)
+        loc = np.array(np.where(result > detection_threshold)).transpose()
+        for [y, x] in loc:
+            matches.append((int(y/scale), int(x/scale), int(h/scale), int(w/scale)))
+    return matches
+    # raise NotImplementedError("Implement me!")
     ########## Code ends here ##########
 
 
@@ -50,7 +70,7 @@ def main():
     template = cv2.imread('stop_signs/stop_template.jpg').astype(np.float32)
     for i in range(1, 6):
         image = cv2.imread('stop_signs/stop%d.jpg' % i).astype(np.float32)
-        matches = template_match(template, image, detection_threshold=0.87)
+        matches = template_match(template, image, num_downscales=3, num_upscales= 2, detection_threshold=0.87)
         create_and_save_detection_image(image, matches, 'stop_signs/stop%d_detection.png' % i)
 
 
